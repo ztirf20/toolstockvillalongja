@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -244,17 +246,48 @@ class _TopChart extends StatelessWidget {
   final List<({String name, int total})> top;
   const _TopChart({required this.top});
 
+  /// Picks a tidy step (1, 2, 5, 10, 20, 50, 100...) giving about 4 gridlines.
+  double _niceInterval(int maxValue) {
+    if (maxValue <= 5) return 1;
+    final rough = maxValue / 4;
+    final mag = math.pow(10, (math.log(rough) / math.ln10).floor()).toDouble();
+    final norm = rough / mag;
+    final step = norm <= 1
+        ? 1
+        : norm <= 2
+            ? 2
+            : norm <= 5
+                ? 5
+                : 10;
+    return step * mag;
+  }
+
+  String _short(double v) {
+    if (v >= 1000) {
+      final k = v / 1000;
+      return '${k == k.roundToDouble() ? k.toStringAsFixed(0) : k.toStringAsFixed(1)}k';
+    }
+    return v.toStringAsFixed(0);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primary;
-    final maxY = top.map((e) => e.total).reduce((a, b) => a > b ? a : b);
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.primary;
+    final maxValue = top.map((e) => e.total).reduce((a, b) => a > b ? a : b);
+    final interval = _niceInterval(maxValue);
+    final maxY = ((maxValue * 1.1) / interval).ceil() * interval;
 
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: maxY * 1.2,
+        maxY: maxY,
         borderData: FlBorderData(show: false),
-        gridData: const FlGridData(show: true, drawVerticalLine: false),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: interval,
+        ),
         barGroups: [
           for (var i = 0; i < top.length; i++)
             BarChartGroupData(
@@ -274,8 +307,26 @@ class _TopChart extends StatelessWidget {
           topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           rightTitles:
               const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: true, reservedSize: 32),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 44,
+              interval: interval,
+              getTitlesWidget: (value, meta) {
+                return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  child: Text(
+                    _short(value),
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -287,7 +338,7 @@ class _TopChart extends StatelessWidget {
                 return SideTitleWidget(
                   axisSide: meta.axisSide,
                   child: SizedBox(
-                    width: 56,
+                    width: 64,
                     child: Text(
                       top[i].name,
                       maxLines: 2,
