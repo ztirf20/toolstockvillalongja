@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-
+import 'qr_scanner_screen.dart';
 import '../models/product.dart';
 import '../models/stock_movement.dart';
 import '../providers/auth_provider.dart';
@@ -145,6 +145,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         title: Text('Stock (${all.length})'),
         actions: [
+                       IconButton(
+               tooltip: 'Scan QR code',
+               icon: const Icon(Icons.qr_code_scanner),
+               onPressed: () => openQrScanner(context),
+             ),
           PopupMenuButton<_Sort>(
             tooltip: 'Sort',
             icon: const Icon(Icons.sort),

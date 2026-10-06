@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import '../widgets/qr_sheet.dart';
 import '../db/database_helper.dart';
 import '../models/stock_movement.dart';
 import '../providers/auth_provider.dart';
@@ -58,6 +58,11 @@ class ProductDetailScreen extends StatelessWidget {
         title: Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis),
         actions: [
           if (isOwner) ...[
+                         IconButton(
+               tooltip: 'QR code',
+               icon: const Icon(Icons.qr_code_2),
+               onPressed: () => showItemQr(context, p),
+             ),
             IconButton(
               tooltip: 'Edit',
               icon: const Icon(Icons.edit_outlined),

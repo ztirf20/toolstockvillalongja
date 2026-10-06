@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'qr_scanner_screen.dart';
 import '../models/app_user.dart';
 import '../models/product.dart';
 import '../models/stock_movement.dart';
@@ -82,6 +82,12 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 12), // NEW
+                    OutlinedButton.icon( // NEW
+                      onPressed: () => openQrScanner(context), // NEW
+                      icon: const Icon(Icons.qr_code_scanner), // NEW
+                      label: const Text('Scan QR code'), // NEW
+                    ), // NEW
                     const SizedBox(height: 14),
                     Column(
                       children: [
